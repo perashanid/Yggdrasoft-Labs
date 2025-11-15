@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { BlogCard } from './BlogCard';
 import { SkeletonGrid } from '../shared/SkeletonLoader';
-import { FaSearch } from 'react-icons/fa';
+import { FaSearch, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import axios from 'axios';
 
 interface Blog {
@@ -23,7 +23,37 @@ export const BlogSection = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [showScrollButtons, setShowScrollButtons] = useState(false);
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 });
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 400;
+      const newScrollLeft = direction === 'left' 
+        ? scrollContainerRef.current.scrollLeft - scrollAmount
+        : scrollContainerRef.current.scrollLeft + scrollAmount;
+      
+      scrollContainerRef.current.scrollTo({
+        left: newScrollLeft,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  useEffect(() => {
+    const checkScroll = () => {
+      if (scrollContainerRef.current) {
+        setShowScrollButtons(
+          scrollContainerRef.current.scrollWidth > scrollContainerRef.current.clientWidth
+        );
+      }
+    };
+    
+    checkScroll();
+    window.addEventListener('resize', checkScroll);
+    return () => window.removeEventListener('resize', checkScroll);
+  }, [blogs]);
 
   useEffect(() => {
     fetchBlogs();
@@ -114,7 +144,7 @@ export const BlogSection = () => {
           )}
         </div>
 
-        {/* Blog Grid */}
+        {/* Blog Grid with Horizontal Scroll */}
         {loading ? (
           <SkeletonGrid count={6} />
         ) : blogs.length === 0 ? (
@@ -122,10 +152,41 @@ export const BlogSection = () => {
             <p className="text-text-secondary text-lg">No articles found</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {blogs.map((blog, index) => (
-              <BlogCard key={blog._id} blog={blog} index={index} />
-            ))}
+          <div className="relative">
+            {/* Left Arrow */}
+            {showScrollButtons && (
+              <button
+                onClick={() => scroll('left')}
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-gold/90 hover:bg-gold text-background-primary p-3 rounded-full shadow-lg transition-all hover:scale-110 hidden md:block"
+                aria-label="Scroll left"
+              >
+                <FaChevronLeft size={20} />
+              </button>
+            )}
+
+            {/* Scrollable Container */}
+            <div 
+              ref={scrollContainerRef}
+              className="flex gap-8 overflow-x-auto scrollbar-hide scroll-smooth pb-4"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {blogs.map((blog, index) => (
+                <div key={blog._id} className="flex-shrink-0 w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)]">
+                  <BlogCard blog={blog} index={index} />
+                </div>
+              ))}
+            </div>
+
+            {/* Right Arrow */}
+            {showScrollButtons && (
+              <button
+                onClick={() => scroll('right')}
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-gold/90 hover:bg-gold text-background-primary p-3 rounded-full shadow-lg transition-all hover:scale-110 hidden md:block"
+                aria-label="Scroll right"
+              >
+                <FaChevronRight size={20} />
+              </button>
+            )}
           </div>
         )}
       </div>

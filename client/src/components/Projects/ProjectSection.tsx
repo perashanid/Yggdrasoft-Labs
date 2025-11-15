@@ -1,12 +1,44 @@
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ProjectCard } from './ProjectCard';
 import { useFetch } from '../../hooks/useFetch';
 import { getProjects } from '../../services/api';
 import { staggerContainer } from '../../styles/theme';
 import { Project } from '../../types';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 export const ProjectSection = () => {
   const { data: projects, loading } = useFetch<Project[]>(getProjects);
+  const [showScrollButtons, setShowScrollButtons] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 400;
+      const newScrollLeft = direction === 'left' 
+        ? scrollContainerRef.current.scrollLeft - scrollAmount
+        : scrollContainerRef.current.scrollLeft + scrollAmount;
+      
+      scrollContainerRef.current.scrollTo({
+        left: newScrollLeft,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  useEffect(() => {
+    const checkScroll = () => {
+      if (scrollContainerRef.current) {
+        setShowScrollButtons(
+          scrollContainerRef.current.scrollWidth > scrollContainerRef.current.clientWidth
+        );
+      }
+    };
+    
+    checkScroll();
+    window.addEventListener('resize', checkScroll);
+    return () => window.removeEventListener('resize', checkScroll);
+  }, [projects]);
 
   if (loading) {
     return (
@@ -55,14 +87,43 @@ export const ProjectSection = () => {
             where ideas take form and solutions come to life.
           </motion.p>
 
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-            variants={staggerContainer}
-          >
-            {projects?.map((project, index) => (
-              <ProjectCard key={project._id} project={project} index={index} />
-            ))}
-          </motion.div>
+          <div className="relative">
+            {/* Left Arrow */}
+            {showScrollButtons && (
+              <button
+                onClick={() => scroll('left')}
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-gold/90 hover:bg-gold text-background-primary p-3 rounded-full shadow-lg transition-all hover:scale-110 hidden md:block"
+                aria-label="Scroll left"
+              >
+                <FaChevronLeft size={20} />
+              </button>
+            )}
+
+            {/* Scrollable Container */}
+            <motion.div
+              ref={scrollContainerRef}
+              className="flex gap-8 overflow-x-auto scrollbar-hide scroll-smooth pb-4"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              variants={staggerContainer}
+            >
+              {projects?.map((project, index) => (
+                <div key={project._id} className="flex-shrink-0 w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)]">
+                  <ProjectCard project={project} index={index} />
+                </div>
+              ))}
+            </motion.div>
+
+            {/* Right Arrow */}
+            {showScrollButtons && (
+              <button
+                onClick={() => scroll('right')}
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-gold/90 hover:bg-gold text-background-primary p-3 rounded-full shadow-lg transition-all hover:scale-110 hidden md:block"
+                aria-label="Scroll right"
+              >
+                <FaChevronRight size={20} />
+              </button>
+            )}
+          </div>
         </motion.div>
       </div>
 
