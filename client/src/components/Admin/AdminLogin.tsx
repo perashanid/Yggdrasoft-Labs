@@ -34,12 +34,15 @@ export const AdminLogin = ({ onLogin }: AdminLoginProps) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0a0e1a] via-[#1a1f2e] to-[#0f1419] px-4 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gold/5 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-teal/5 rounded-full blur-3xl animate-pulse delay-1000" />
-      </div>
+    <div className="min-h-screen flex items-center justify-center bg-background-primary px-4 relative overflow-hidden">
+      {/* Tree background image */}
+      <div 
+        className="absolute inset-0 opacity-10 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('/assets/full picture with background.png')" }}
+      />
+      
+      {/* Subtle overlay */}
+      <div className="absolute inset-0 bg-background-primary/80" />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -53,9 +56,13 @@ export const AdminLogin = ({ onLogin }: AdminLoginProps) => {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-gold to-teal rounded-2xl flex items-center justify-center shadow-2xl"
+            className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center shadow-2xl overflow-hidden bg-background-secondary border-2 border-gold/30"
           >
-            <FaLock className="text-3xl text-white" />
+            <img 
+              src="/assets/favicon.png" 
+              alt="Yggdrasil Logo" 
+              className="w-full h-full object-contain p-2"
+            />
           </motion.div>
           <h1 className="text-4xl font-bold text-gold mb-2 font-heading">Admin Portal</h1>
           <p className="text-gold-light">Secure access to Yggdrasil dashboard</p>
@@ -66,7 +73,7 @@ export const AdminLogin = ({ onLogin }: AdminLoginProps) => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3 }}
-          className="bg-gradient-to-br from-background-secondary/90 to-background-secondary/70 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-gold/20"
+          className="bg-background-secondary/95 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-gold/20"
         >
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {error && (
@@ -146,22 +153,19 @@ export const AdminLogin = ({ onLogin }: AdminLoginProps) => {
               disabled={loading}
               whileHover={{ scale: loading ? 1 : 1.02 }}
               whileTap={{ scale: loading ? 1 : 0.98 }}
-              className="w-full py-4 bg-gradient-to-r from-gold to-teal text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-gold/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg relative overflow-hidden group"
+              className="w-full py-4 bg-gold text-background-primary rounded-xl font-bold text-lg shadow-lg hover:shadow-gold/50 hover:bg-gold-light transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span className="relative z-10">
-                {loading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    Authenticating...
-                  </span>
-                ) : (
-                  'Access Dashboard'
-                )}
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-teal to-gold opacity-0 group-hover:opacity-100 transition-opacity" />
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Authenticating...
+                </span>
+              ) : (
+                'Access Dashboard'
+              )}
             </motion.button>
           </form>
 
